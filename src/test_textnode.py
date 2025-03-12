@@ -165,7 +165,27 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(TextNode.extract_markdown_images("This is an image! ![alt text](https://thisi.san/image.png)"), [("alt text", "https://thisi.san/image.png")])
 
     def test_extract_markdown_links(self):
-        self.assertEqual(TextNode.extract_markdown_images("This is a [link](https://boot.dev)!"), [("link", "https://boot.dev")])
+        self.assertEqual(TextNode.extract_markdown_links("This is a [link](https://boot.dev)!"), [("link", "https://boot.dev")])
+
+    
+
+    def test_markdown_parsing_image(self):
+        node = TextNode("This is text with ![first image](https://i.imgur.com/zjjcJKZ.png) and ![second image](https://i.imgur.com/3elNhQu.png)", TextType.TEXT)
+        self.assertEqual(TextNode.split_nodes_image([node]), [
+            TextNode("This is text with ", TextType.TEXT),
+            TextNode("first image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png")
+        ])
+
+    def test_markdown_parsing_link(self):
+        node = TextNode("This is text with a [link](https://boot.dev) and another [link](https://boot.dev)", TextType.TEXT)
+        self.assertEqual(TextNode.split_nodes_link([node]), [
+            TextNode("This is text with a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev")
+        ])
 
 if __name__ == "__main__":
     unittest.main()

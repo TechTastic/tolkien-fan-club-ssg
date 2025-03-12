@@ -59,7 +59,63 @@ class TextNode:
         return new_nodes
     
     def extract_markdown_images(text):
-        return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+        return re.findall(r"\!\[(.*?)\]\((.*?)\)", text)
     
     def extract_markdown_links(text):
-        return re.findall(r"\[(.*?)\]\((.*?)\)")
+        return re.findall(r"[^!]\[(.*?)\]\((.*?)\)", text)
+    
+    def split_nodes_image(old_nodes):
+        new_nodes = []
+        for node in old_nodes:
+            matches = TextNode.extract_markdown_images(node.text)
+            
+            if not matches:
+                return old_nodes
+
+            if node.text_type != TextType.TEXT:
+                new_nodes.append(node)
+                continue
+            
+            text = node.text
+            for match in matches:
+                alt_text = match[0]
+                image_url = match[1]
+                splitter = f"![{alt_text}]({image_url})"
+
+                split = text.split(splitter)
+
+                before = split[0]
+                if before:
+                    new_nodes.append(TextNode(split[0], TextType.TEXT))
+                new_nodes.append(TextNode(alt_text, TextType.IMAGE, image_url))
+
+                text = text.replace(before + splitter, "")
+        return new_nodes
+
+    def split_nodes_link(old_nodes):
+        new_nodes = []
+        for node in old_nodes:
+            matches = TextNode.extract_markdown_links(node.text)
+            
+            if not matches:
+                return old_nodes
+
+            if node.text_type != TextType.TEXT:
+                new_nodes.append(node)
+                continue
+            
+            text = node.text
+            for match in matches:
+                wrapped_text = match[0]
+                link_url = match[1]
+                splitter = f"[{wrapped_text}]({link_url})"
+
+                split = text.split(splitter)
+
+                before = split[0]
+                if before:
+                    new_nodes.append(TextNode(split[0], TextType.TEXT))
+                new_nodes.append(TextNode(wrapped_text, TextType.LINK, link_url))
+
+                text = text.replace(before + splitter, "")
+        return new_nodes
