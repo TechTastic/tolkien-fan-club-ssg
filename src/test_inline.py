@@ -4,7 +4,7 @@ from textnode import TextNode, TextType
 import inline
 
 
-class TestTextNode(unittest.TestCase):
+class TestInline(unittest.TestCase):
     def test_markdown_parsing_bold(self):
         nodes = [
             TextNode("**This** is bold!", TextType.TEXT),
