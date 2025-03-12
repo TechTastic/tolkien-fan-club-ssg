@@ -1,11 +1,11 @@
 from htmlnode import HTMLNode
 
 class LeafNode(HTMLNode):
-    def __init__(self, tag, value, props=None):
+    def __init__(self, tag, value=None, props=None):
         super().__init__(tag, value, props=props)
     
     def to_html(self):
-        if not self.value:
+        if self.value is None:
             raise ValueError("All leaf nodes must have a value")
         if not self.tag:
             return self.value

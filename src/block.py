@@ -1,6 +1,11 @@
 from enum import Enum
 import re
 
+import inline
+from textnode import TextNode, TextType
+from parentnode import ParentNode
+from leafnode import LeafNode
+
 class BlockType(Enum):
     HEADING = "heading"
     CODE = "code"
@@ -67,3 +72,52 @@ def block_to_block_type(block):
             case _:
                 return BlockType.PARAGRAPH
     '''
+
+def markdown_to_html_node(markdown):
+    main_children = []
+
+    blocks = markdown_to_blocks(markdown)
+    for bl in blocks:
+        parsed_children = parse_inline_markdown_formatting(bl)
+        match block_to_block_type(bl):
+            case BlockType.HEADING:
+                main_children.append(ParentNode(f"h{bl.count("#")}", parsed_children))
+            case BlockType.CODE:
+                main_children.append(ParentNode("pre", [to_code_text_node(bl)]))
+            case BlockType.QUOTE:
+                main_children.append(ParentNode("blockquote", parsed_children))
+            case BlockType.UNORDERED:
+                main_children.append(to_unordered_list(bl))
+            case BlockType.ORDERED:
+                main_children.append(to_ordered_list(bl))
+            case BlockType.PARAGRAPH:
+                main_children.append(ParentNode("p", parsed_children))
+
+    return ParentNode("div", main_children)
+
+def to_code_text_node(code):
+    split = code.split("\n")
+    return TextNode("\n".join(split[1:len(split) - 1]), TextType.CODE).to_html_node()
+
+def parse_inline_markdown_formatting(text):
+    nodes = inline.text_to_textnodes(text)
+    nodes = list(map(lambda node: TextNode(node.text.replace("> ", "").strip(), node.text_type, node.url).to_html_node(), nodes))
+    nodes = list(map(lambda node: ParentNode("pre", [node]) if node.tag == "code" else node, nodes))
+    return nodes
+
+def to_unordered_list(text):
+    children = []
+    items = text.split("- ")
+    for item in items:
+        if not item:
+            continue
+        children.append(ParentNode("li", parse_inline_markdown_formatting(item)))
+    return ParentNode("ul", children)
+
+def to_ordered_list(text):
+    children = []
+    items = text.split("\n")
+    for i in range(0, len(items)):
+        item = items[i].replace(f"{i + 1}. ", "")
+        children.append(ParentNode("li", parse_inline_markdown_formatting(item)))
+    return ParentNode("ol", children)

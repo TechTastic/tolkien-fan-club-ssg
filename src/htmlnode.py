@@ -15,4 +15,4 @@ class HTMLNode:
         return "".join(props)
     
     def __repr__(self):
-        return f"HTMLNode({tag}, {value}, {children}, {props})"
+        return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
