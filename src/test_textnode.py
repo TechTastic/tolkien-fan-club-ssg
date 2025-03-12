@@ -126,6 +126,46 @@ class TestTextNode(unittest.TestCase):
             TextNode("This", TextType.CODE),
             TextNode(" is an inline code block!", TextType.TEXT)
         ])
+    
+    def test_markdown_parsing_all_again(self):
+        nodes = [
+            TextNode("**This** is bold and _this_ is italicized and `this` is an inline code block!", TextType.TEXT)
+        ]
+        nodes = TextNode.split_nodes_delimiter(nodes, "**", TextType.BOLD)
+        nodes = TextNode.split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+        nodes = TextNode.split_nodes_delimiter(nodes, "`", TextType.CODE)
+        self.assertEqual(nodes, [
+            TextNode("This", TextType.BOLD),
+            TextNode(" is bold and ", TextType.TEXT),
+            TextNode("this", TextType.ITALIC),
+            TextNode(" is italicized and ", TextType.TEXT),
+            TextNode("this", TextType.CODE),
+            TextNode(" is an inline code block!", TextType.TEXT)
+        ])
+
+    def test_markdown_parsing_all_again_reversed(self):
+        nodes = [
+            TextNode("`This` is an inline code block and _this_ is italicized and **this** is bold!", TextType.TEXT)
+        ]
+        nodes = TextNode.split_nodes_delimiter(nodes, "**", TextType.BOLD)
+        nodes = TextNode.split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+        nodes = TextNode.split_nodes_delimiter(nodes, "`", TextType.CODE)
+        self.assertEqual(nodes, [
+            TextNode("This", TextType.CODE),
+            TextNode(" is an inline code block and ", TextType.TEXT),
+            TextNode("this", TextType.ITALIC),
+            TextNode(" is italicized and ", TextType.TEXT),
+            TextNode("this", TextType.BOLD),
+            TextNode(" is bold!", TextType.TEXT)
+        ])
+
+
+
+    def test_extract_markdown_images(self):
+        self.assertEqual(TextNode.extract_markdown_images("This is an image! ![alt text](https://thisi.san/image.png)"), [("alt text", "https://thisi.san/image.png")])
+
+    def test_extract_markdown_links(self):
+        self.assertEqual(TextNode.extract_markdown_images("This is a [link](https://boot.dev)!"), [("link", "https://boot.dev")])
 
 if __name__ == "__main__":
     unittest.main()

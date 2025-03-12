@@ -52,8 +52,14 @@ class TextNode:
                 text = texts[i]
                 if text == "":
                     continue
-                if i == 0 or i % 2 == 0:
+                if i % 2 == 0:
                     new_nodes.append(TextNode(text, TextType.TEXT))
                 else:
                     new_nodes.append(TextNode(text, text_type))
         return new_nodes
+    
+    def extract_markdown_images(text):
+        return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+    
+    def extract_markdown_links(text):
+        return re.findall(r"\[(.*?)\]\((.*?)\)")
