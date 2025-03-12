@@ -186,6 +186,27 @@ class TestTextNode(unittest.TestCase):
             TextNode(" and another ", TextType.TEXT),
             TextNode("link", TextType.LINK, "https://boot.dev")
         ])
+    
+    def test_markdown_parsing_full(self):
+        node = TextNode("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)", TextType.TEXT)
+        bold_nodes = TextNode.split_nodes_delimiter([node], "**", TextType.BOLD)
+        italic_nodes = TextNode.split_nodes_delimiter(bold_nodes, "_", TextType.ITALIC)
+        code_nodes = TextNode.split_nodes_delimiter(italic_nodes, "`", TextType.CODE)
+        image_nodes = TextNode.split_nodes_image(code_nodes)
+        link_nodes = TextNode.split_nodes_link(image_nodes)
+
+        self.assertEqual(link_nodes, [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev")
+        ])
 
 if __name__ == "__main__":
     unittest.main()

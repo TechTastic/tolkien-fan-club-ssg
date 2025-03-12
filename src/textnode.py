@@ -68,11 +68,8 @@ class TextNode:
         new_nodes = []
         for node in old_nodes:
             matches = TextNode.extract_markdown_images(node.text)
-            
-            if not matches:
-                return old_nodes
 
-            if node.text_type != TextType.TEXT:
+            if node.text_type != TextType.TEXT or not matches:
                 new_nodes.append(node)
                 continue
             
@@ -82,7 +79,7 @@ class TextNode:
                 image_url = match[1]
                 splitter = f"![{alt_text}]({image_url})"
 
-                split = text.split(splitter)
+                split = text.split(splitter, 1)
 
                 before = split[0]
                 if before:
@@ -90,6 +87,9 @@ class TextNode:
                 new_nodes.append(TextNode(alt_text, TextType.IMAGE, image_url))
 
                 text = text.replace(before + splitter, "")
+            if text:
+                new_nodes.append(TextNode(text, TextType.TEXT))
+
         return new_nodes
 
     def split_nodes_link(old_nodes):
@@ -98,8 +98,9 @@ class TextNode:
             matches = TextNode.extract_markdown_links(node.text)
             
             if not matches:
-                return old_nodes
-
+                new_nodes.append(node)
+                continue
+            
             if node.text_type != TextType.TEXT:
                 new_nodes.append(node)
                 continue
@@ -110,7 +111,7 @@ class TextNode:
                 link_url = match[1]
                 splitter = f"[{wrapped_text}]({link_url})"
 
-                split = text.split(splitter)
+                split = text.split(splitter, 1)
 
                 before = split[0]
                 if before:
@@ -118,4 +119,6 @@ class TextNode:
                 new_nodes.append(TextNode(wrapped_text, TextType.LINK, link_url))
 
                 text = text.replace(before + splitter, "")
+            if text:
+                new_nodes.append(TextNode(text, TextType.TEXT))
         return new_nodes
