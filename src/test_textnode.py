@@ -24,9 +24,10 @@ class TestTextNode(unittest.TestCase):
         node2 = TextNode("This is a text node", TextType.BOLD, "https://boot.dev")
         self.assertNotEqual(node, node2)
 
+
     
     def test_text(self):
-        node = TextNode("This is a normal text node", TextType.NORMAL)
+        node = TextNode("This is a normal text node", TextType.TEXT)
         html_node = node.to_html_node()
         self.assertEqual(html_node.tag, None)
         self.assertEqual(html_node.value, "This is a normal text node")
@@ -63,6 +64,68 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.tag, "img")
         self.assertEqual(html_node.value, "")
         self.assertEqual(html_node.props, {"src": image, "alt": "This is an image text node"})
+
+    
+    
+    def test_markdown_parsing_bold(self):
+        nodes = [
+            TextNode("**This** is bold!", TextType.TEXT),
+            TextNode("_This_ is italicized!", TextType.TEXT),
+            TextNode("`This` is an inline code block!", TextType.TEXT)
+        ]
+        new_nodes = TextNode.split_nodes_delimiter(nodes, "**", TextType.BOLD)
+        self.assertEqual(new_nodes, [
+            TextNode("This", TextType.BOLD),
+            TextNode(" is bold!", TextType.TEXT),
+            TextNode("_This_ is italicized!", TextType.TEXT),
+            TextNode("`This` is an inline code block!", TextType.TEXT)
+        ])
+    
+    def test_markdown_parsing_italic(self):
+        nodes = [
+            TextNode("**This** is bold!", TextType.TEXT),
+            TextNode("_This_ is italicized!", TextType.TEXT),
+            TextNode("`This` is an inline code block!", TextType.TEXT)
+        ]
+        new_nodes = TextNode.split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+        self.assertEqual(new_nodes, [
+            TextNode("**This** is bold!", TextType.TEXT),
+            TextNode("This", TextType.ITALIC),
+            TextNode(" is italicized!", TextType.TEXT),
+            TextNode("`This` is an inline code block!", TextType.TEXT)
+        ])
+    
+    def test_markdown_parsing_code(self):
+        nodes = [
+            TextNode("**This** is bold!", TextType.TEXT),
+            TextNode("_This_ is italicized!", TextType.TEXT),
+            TextNode("`This` is an inline code block!", TextType.TEXT)
+        ]
+        new_nodes = TextNode.split_nodes_delimiter(nodes, "`", TextType.CODE)
+        self.assertEqual(new_nodes, [
+            TextNode("**This** is bold!", TextType.TEXT),
+            TextNode("_This_ is italicized!", TextType.TEXT),
+            TextNode("This", TextType.CODE),
+            TextNode(" is an inline code block!", TextType.TEXT)
+        ])
+    
+    def test_markdown_parsing_all(self):
+        nodes = [
+            TextNode("**This** is bold!", TextType.TEXT),
+            TextNode("_This_ is italicized!", TextType.TEXT),
+            TextNode("`This` is an inline code block!", TextType.TEXT)
+        ]
+        bold_nodes = TextNode.split_nodes_delimiter(nodes, "**", TextType.BOLD)
+        italic_nodes = TextNode.split_nodes_delimiter(bold_nodes, "_", TextType.ITALIC)
+        code_nodes = TextNode.split_nodes_delimiter(italic_nodes, "`", TextType.CODE)
+        self.assertEqual(code_nodes, [
+            TextNode("This", TextType.BOLD),
+            TextNode(" is bold!", TextType.TEXT),
+            TextNode("This", TextType.ITALIC),
+            TextNode(" is italicized!", TextType.TEXT),
+            TextNode("This", TextType.CODE),
+            TextNode(" is an inline code block!", TextType.TEXT)
+        ])
 
 if __name__ == "__main__":
     unittest.main()
