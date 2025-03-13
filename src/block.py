@@ -100,9 +100,8 @@ def to_code_text_node(code):
     return TextNode("\n".join(split[1:len(split) - 1]), TextType.CODE).to_html_node()
 
 def parse_inline_markdown_formatting(text):
-    nodes = inline.text_to_textnodes(text)
-    nodes = list(map(lambda node: TextNode(node.text.replace("> ", "").strip(), node.text_type, node.url).to_html_node(), nodes))
-    nodes = list(map(lambda node: ParentNode("pre", [node]) if node.tag == "code" else node, nodes))
+    nodes = inline.text_to_textnodes(text.strip())
+    nodes = list(map(lambda node: TextNode(node.text.replace("> ", "").replace("###### ", "").replace("##### ", "").replace("#### ", "").replace("### ", "").replace("## ", "").replace("# ", ""), node.text_type, node.url).to_html_node(), nodes))
     return nodes
 
 def to_unordered_list(text):
