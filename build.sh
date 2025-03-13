@@ -1,1 +1,1 @@
-python3 src/main.py "tolkien-fan-club-ssg"
+python3 src/main.py "https://techtastic.github.io/tolkien-fan-club-ssg/"
