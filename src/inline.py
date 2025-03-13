@@ -93,14 +93,15 @@ def split_nodes_link(old_nodes):
             link_url = match[1]
             splitter = f"[{wrapped_text}]({link_url})"
 
-            split = text.split(splitter, 1)
+            split = text.split(splitter)
 
             before = split[0]
+            print(f"Before: {before}")
             if before:
                 new_nodes.append(TextNode(split[0], TextType.TEXT))
             new_nodes.append(TextNode(wrapped_text, TextType.LINK, link_url))
 
             text = text.replace(before + splitter, "")
-        if text:
+        if text != "":
             new_nodes.append(TextNode(text, TextType.TEXT))
     return new_nodes

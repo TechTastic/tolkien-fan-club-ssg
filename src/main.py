@@ -1,6 +1,7 @@
 import os
 import shutil
 import generation
+import sys
 
 def delete_old_site():
     print("Deleting old site...")
@@ -20,10 +21,14 @@ def copy_over_static(source, destination):
             copy_over_static(os.path.join(source, file), os.path.join(destination, file))
 
 def main():
+    try:
+        basepath = sys.argv[0]
+    except IndexError:
+        basepath = "/"
+
     delete_old_site()
     print("Copying over static assets...")
     copy_over_static("static", "public")
-    #generation.generate_page("content/index.md", "template.html", "public/index.html")
-    generation.generate_pages_recursive("content", "template.html", "public")
+    generation.generate_pages_recursive("content", "template.html", "public", basepath)
 
 main()

@@ -24,9 +24,9 @@ def block_to_block_type(block):
         return BlockType.HEADING
     if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
         return BlockType.CODE
-    if block.startswith(">"):
+    if block.startswith("> "):
         for line in lines:
-            if not line.startswith(">"):
+            if not line.startswith("> "):
                 return BlockType.PARAGRAPH
         return BlockType.QUOTE
     if block.startswith("- "):
@@ -99,8 +99,11 @@ def to_code_text_node(code):
     split = code.split("\n")
     return TextNode("\n".join(split[1:len(split) - 1]), TextType.CODE).to_html_node()
 
+def to_paragraph_node
+
 def parse_inline_markdown_formatting(text):
     nodes = inline.text_to_textnodes(text.strip())
+    print(nodes)
     nodes = list(map(lambda node: TextNode(node.text.replace("> ", "").replace("###### ", "").replace("##### ", "").replace("#### ", "").replace("### ", "").replace("## ", "").replace("# ", ""), node.text_type, node.url).to_html_node(), nodes))
     return nodes
 
