@@ -23,6 +23,7 @@ def main():
     delete_old_site()
     print("Copying over static assets...")
     copy_over_static("static", "public")
-    generation.generate_page("content/index.md", "template.html", "public/index.html")
+    #generation.generate_page("content/index.md", "template.html", "public/index.html")
+    generation.generate_pages_recursive("content", "template.html", "public")
 
 main()
